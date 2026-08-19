@@ -4,6 +4,7 @@ use anchor_lang::{
     system_program::{transfer, Transfer},
 };
 
+//for registration program declaration 
 declare_program!(registration);
 
 use registration::cpi::{accounts::Initialize, initialize};
@@ -59,9 +60,19 @@ impl<'info> Withdraw<'info> {
 
         transfer(cpi_ctx, amount)?;
 
-        // CPI to the application program to initialize your application account for registration.
-        // All the neccessary function and account struct have been imported. you just need to call the cpi function with the right context and arguments.
-        // make sure you pass in your github id
+        let cpi_program = self.application_program.to_account_info().key();
+
+        //do cpi to the application program to initialize the account for registration
+
+        let cpi_accounts = Initialize {
+            account: self.application_account.to_account_info(),
+            user: self.user.to_account_info(),
+            system_program: self.system_program.to_account_info(),
+        };
+
+        let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
+
+        initialize(cpi_ctx, "DHRUVILPATEL2303".to_string())?;
 
         Ok(())
     }
